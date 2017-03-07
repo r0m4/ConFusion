@@ -8,19 +8,18 @@ var Verify = require('./verify');
 router.get('/', Verify.verifyOrdinaryUser, Verify.verifyAdmin, function(req, res, next) {
   User.find({}, function(err, users){
       if(err){
-        throw err;
+        next (err);
       }
-      res.json(users);
+      return res.status(200).json(users);
   });
 });
 
 router.post('/register', function(req, res) {
     User.register(new User({ username : req.body.username }),
-      req.body.password, function(err, user) {
+        req.body.password, function(err, user) {
         if (err) {
             return res.status(500).json({err: err});
         }
-
 
         if(req.body.firstname) {
           user.firstname = req.body.firstname;
@@ -57,8 +56,6 @@ router.post('/login', function(req, res, next) {
         });
       }
       
-      //console.log('User in users: ', user);
-
       var token = Verify.getToken({"username":user.username, "_id":user._id, "admin":user.admin});
 
       res.status(200).json({
